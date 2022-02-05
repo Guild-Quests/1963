@@ -3,7 +3,7 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, set} from "firebase/database";
+import { getDatabase, onValue, ref, set, push} from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB_SFyioC74x0YgA2CwI6myAs5CBMEuovA",
@@ -16,7 +16,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+  const db = getDatabase(app);  
+
 
 const API_KEY = 'AIzaSyBE9ikpCz88OCjs-f9bjJjyiYmWYOoR-_Q';
 
@@ -48,14 +49,16 @@ const Spinner = () => {
 }
 
 const MyMapComponent = () => {
+  const markersRef = ref(db, 'markers');
+  
 
   const center = { lat: -34.397, lng: 150.644 };
   const zoom = 4;
 
-  const ref = useRef();
+  const mapRef = useRef();
 
   useEffect(() => {
-    let map = new window.google.maps.Map(ref.current, {
+    let map = new window.google.maps.Map(mapRef.current, {
       center,
       zoom,
     });
@@ -66,6 +69,28 @@ const MyMapComponent = () => {
       let marker = new window.google.maps.Marker({
         position: event.latLng,
         map,
+      });
+
+      const newMarkersRef = push(markersRef);
+
+      // Add marker to firebase in the markers collection
+      set(newMarkersRef, {
+        lat: event.latLng.lat(),
+        lng: event.latLng.lng(),
+      });
+    });
+
+    
+
+    onValue(markersRef, (snapshot) => {
+      snapshot.forEach((child) => {
+        let marker = new window.google.maps.Marker({
+          position: {
+            lat: child.val().lat,
+            lng: child.val().lng,
+          },
+          map,
+        });
       });
     });
 
@@ -101,9 +126,8 @@ const MyMapComponent = () => {
   return (
     <div className={styles.map}>
       <div
-        ref={ref}
+        ref={mapRef}
         className={styles.map}
-        onClick={onClick}
       />
     </div>
   );
