@@ -52,8 +52,9 @@ const MyMapComponent = () => {
   const markersRef = ref(db, 'markers');
   
 
-  const center = { lat: -34.397, lng: 150.644 };
-  const zoom = 4;
+  const center = { lat: 32.77915961445464, lng: -96.80878205735175};
+  const zoom = 19;
+  const mapType = 'satellite';
 
   const mapRef = useRef();
 
@@ -61,6 +62,7 @@ const MyMapComponent = () => {
     let map = new window.google.maps.Map(mapRef.current, {
       center,
       zoom,
+      mapTypeId: mapType
     });
 
     map.addListener('click', (event) => {
@@ -91,6 +93,19 @@ const MyMapComponent = () => {
           },
           map,
         });
+
+        marker.addListener('click', () => {
+          console.log(child.val());
+
+          // Infowindow with lat and lng displayed
+          let infowindow = new window.google.maps.InfoWindow({
+            content: `Latitude: ${child.val().lat}<br>Longitude: ${child.val().lng}`
+          });
+
+          infowindow.open(map, marker);
+          
+        });
+
       });
     });
 
