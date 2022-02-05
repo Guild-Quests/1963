@@ -7,6 +7,12 @@
   height: 100vh;
 }
 
+.findMe  {
+  position: absolute;
+  bottom: 1rem;
+  right: '100px';
+}
+
 .main {
   min-height: 100vh;
   padding: 4rem 0;
